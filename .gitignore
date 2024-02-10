@@ -2,7 +2,7 @@
 .DS_Store
 
 # Ignore the local configuration file
-/.env
+.env
 
 # Binaries for programs and plugins
 *.exe

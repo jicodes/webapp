@@ -4,14 +4,39 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jicodes/webapp/controllers"
+	"github.com/jicodes/webapp/initializers"
+	"github.com/jicodes/webapp/middlewares"
 )
+
+func init () {
+	initializers.LoadEnvVariables()
+	initializers.ConnectDB()
+	initializers.SyncDB()
+}
 
 func main() {
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
+	
+	r.Use(middlewares.CheckRequestMethod())
+	r.Use(middlewares.CheckPayload())
+
+	r.GET("/healthz", func(c *gin.Context) {
+		c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Header("Pragma", "no-cache")
+		c.Header("X-Content-Type-Options", "nosniff")
+
+		if err := initializers.DB.Exec("SELECT 1").Error; err == nil {
+			c.Status(http.StatusOK)
+		} else {
+			c.Status(http.StatusServiceUnavailable)
+		}
 	})
+	
+	r.POST("/v1/user", controllers.CreateUser)
+	r.GET("/v1/user/self", middlewares.BasicAuth(), controllers.GetUser)
+	r.PUT("/v1/user/self", middlewares.BasicAuth(), controllers.UpdateUser)
+
 	r.Run()
+
 }
