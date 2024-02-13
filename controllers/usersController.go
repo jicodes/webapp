@@ -24,6 +24,14 @@ func CreateUser(c *gin.Context) {
 		}) 
 		return
 	}
+
+	if !models.ValidateEmail(body.Username) {
+		c.JSON(http.StatusBadRequest, gin.H{ //400
+			"error": "Username must be a valid email",
+		})
+		return
+	}
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ //400
@@ -31,6 +39,7 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
+
 	user := models.User{
 		FirstName: body.FirstName,
 		LastName: body.LastName,
@@ -45,24 +54,23 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{ //201
-		"message": "User created",
-	}) 
+
+	publicUser := models.PublicUser{
+		ID:             user.ID,
+		FirstName:      user.FirstName,
+		LastName:       user.LastName,
+		Username:       user.Username,
+		AccountCreated: user.AccountCreated,
+		AccountUpdated: user.AccountUpdated,
+	}
+
+	c.JSON(http.StatusCreated, publicUser) 
 }
 
 func GetUser(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 
-	type publicUser struct {
-		ID             string    `json:"id"`
-		FirstName      string    `json:"first_name"`
-		LastName       string    `json:"last_name"`
-		Username       string    `json:"username"`
-		AccountCreated time.Time `json:"account_created"`
-		AccountUpdated time.Time `json:"account_updated"`
-	}
-
-	public := publicUser{
+	public := models.PublicUser{
 		ID:             user.ID,
 		FirstName:      user.FirstName,
 		LastName:       user.LastName,
