@@ -32,6 +32,15 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	var existingUser models.User
+	existence := initializers.DB.First(&existingUser, "username = ?", body.Username)
+	if existence.Error == nil {
+		c.JSON(http.StatusBadRequest, gin.H{ //400
+			"error": "User already exists",
+		})
+		return
+	}
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ //400
@@ -39,15 +48,15 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-
-	user := models.User{
+	
+	newUser := models.User{
 		FirstName: body.FirstName,
 		LastName: body.LastName,
 		Password: string(hash),
 		Username: body.Username, 
 	}
-	
-	result := initializers.DB.Create(&user)
+
+	result := initializers.DB.Create(&newUser)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ //400
 			"error": "Failed to create user",
@@ -56,12 +65,12 @@ func CreateUser(c *gin.Context) {
 	}
 
 	publicUser := models.PublicUser{
-		ID:             user.ID,
-		FirstName:      user.FirstName,
-		LastName:       user.LastName,
-		Username:       user.Username,
-		AccountCreated: user.AccountCreated,
-		AccountUpdated: user.AccountUpdated,
+		ID:             newUser.ID,
+		FirstName:      newUser.FirstName,
+		LastName:       newUser.LastName,
+		Username:       newUser.Username,
+		AccountCreated: newUser.AccountCreated,
+		AccountUpdated: newUser.AccountUpdated,
 	}
 
 	c.JSON(http.StatusCreated, publicUser) 
@@ -96,19 +105,18 @@ func UpdateUser(c *gin.Context) {
 	// Check disallowed fields in the request body
   if updated.ID != "" ||  updated.Username != "" || updated.AccountCreated != (time.Time{}) || updated.AccountUpdated != (time.Time{}) {
     c.JSON(http.StatusBadRequest, gin.H{ //400
-      "error": "Attempt to update disallowed field",
+      "error": "You can only update the fields of FirstName, LastName and Password",
     })
     return
   }
 
   // Return 204 if no changes were made
 	if updated.FirstName == "" && updated.LastName == "" && updated.Password == "" {
-		c.JSON(http.StatusNoContent, gin.H{
-			"message": "No changes were made",
-		})
+		c.JSON(http.StatusNoContent, nil) // 204 expects no body in the response
 		return
 	}
 
+	// Update the user successfully
 	user.FirstName = updated.FirstName
 	user.LastName = updated.LastName
 	if updated.Password != "" {

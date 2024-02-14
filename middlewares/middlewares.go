@@ -66,7 +66,7 @@ func BasicAuth () gin.HandlerFunc {
 		// Check if the user exists 
 		if result.Error != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid credentials",
+				"error": "User does not exist",
 			})
 			c.Abort()
 			return
