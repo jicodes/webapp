@@ -15,9 +15,8 @@ func init () {
 	initializers.SyncDB()
 }
 
-func main() {
+func setupRouter() *gin.Engine {
 	r := gin.Default()
-	
 	r.Use(middlewares.CheckRequestMethod())
 	r.Use(middlewares.CheckPayload())
 
@@ -37,6 +36,10 @@ func main() {
 	r.GET("/v1/user/self", middlewares.BasicAuth(), controllers.GetUser)
 	r.PUT("/v1/user/self", middlewares.BasicAuth(), controllers.UpdateUser)
 
-	r.Run()
+	return r
+}
 
+func main() {
+	r := setupRouter()
+	r.Run()
 }
