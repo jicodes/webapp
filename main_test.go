@@ -101,7 +101,7 @@ func TestCreateUser(t *testing.T) {
 		Username:  testUsername,
 	}
 
-	assert.Equal(t, expectedUser.FirstName, createdUser.FirstName)
+	assert.Equal(t, expectedUser.LastName, createdUser.FirstName)
 	assert.Equal(t, expectedUser.LastName, createdUser.LastName)
 	assert.Equal(t, expectedUser.Username, createdUser.Username)
 
