@@ -3,7 +3,7 @@ name: Go webapp workflow
 on: pull_request
 
 jobs:
-  build-and-run:
+  integration-tests:
     runs-on: ubuntu-latest
 
     services:
@@ -40,7 +40,5 @@ jobs:
       - name: Set up environment variables
         run: echo "DB_DSN=host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable" >> $GITHUB_ENV
 
-      - name: Build and run the webapp
-        run: |
-          go build -o webapp
-          nohup ./webapp &
+      - name: Run integration tests
+        run: go test -v ./...
