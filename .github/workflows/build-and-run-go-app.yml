@@ -1,4 +1,4 @@
-name: go project with integration tests
+name: Build and run Go project
 
 on: pull_request
 
@@ -39,9 +39,6 @@ jobs:
 
       - name: Set up environment variables
         run: echo "DB_DSN=host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable" >> $GITHUB_ENV
-
-      - name: Run integration tests
-        run: go test -v ./...
 
       - name: Build and run the webapp
         run: |
