@@ -1,0 +1,73 @@
+name: Packer workflow
+
+on:
+  pull_request:
+    types:
+      - closed
+
+env:
+  PACKER_VERSION: "1.10.1"
+
+jobs:
+  packer-build-custom-image:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out code into app directory
+        uses: actions/checkout@v4
+
+      - name: Set up Go 1.21.6
+        uses: actions/setup-go@v5.0.0
+        with:
+          go-version: "1.21.6"
+      - run: go version
+
+      - name: Get all dependencies based on go.mod
+        run: go mod download
+
+      - name: Set up environment variables
+        run: echo "DB_DSN=host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable" >> $GITHUB_ENV
+
+      - name: Run integration tests
+        run: go test -v ./...
+
+      - name: Build the application
+        run: go build -o webapp
+
+      - name: Authenticate Packer to Google Cloud via service sccount key
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.PACKER_SERVICE_ACCOUNT}}
+
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: ${{ env.PACKER_VERSION }}
+
+      - name: Run `packer build`
+        id: build
+        run: packer build .
