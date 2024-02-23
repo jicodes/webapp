@@ -60,17 +60,17 @@ build {
     "source.googlecompute.csye6225-app-custom-image"
   ]
 
-  // provisioner "shell" {
-  //   script = "updateOS.sh"
-  // }
+  provisioner "shell" {
+    script = "updateOS.sh"
+  }
 
-  // provisioner "shell" {
-  //   script = "setupGolang.sh"
-  // }
+  provisioner "shell" {
+    script = "setupGolang.sh"
+  }
 
-  // provisioner "shell" {
-  //   script = "setupDB.sh"
-  // }
+  provisioner "shell" {
+    script = "setupDB.sh"
+  }
 
   provisioner "shell" {
     script = "setupVmUser.sh"
