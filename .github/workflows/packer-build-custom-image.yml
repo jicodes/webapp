@@ -58,12 +58,6 @@ jobs:
         with:
           credentials_json: ${{ secrets.PACKER_SERVICE_ACCOUNT}}
 
-      - name: Setup gcloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: "Use gcloud CLI"
-        uses: gcloud info
-
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
         with:
