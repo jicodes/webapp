@@ -44,7 +44,7 @@ jobs:
       - name: Get all dependencies based on go.mod
         run: go mod download
 
-      - name: Set up environment variables
+      - name: Setup environment variables
         run: echo "DB_DSN=host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable" >> $GITHUB_ENV
 
       - name: Run integration tests
@@ -54,22 +54,22 @@ jobs:
         run: go build -o webapp
 
       - name: Authenticate Packer to Google Cloud via service sccount key
-        id: auth
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.PACKER_SERVICE_ACCOUNT}}
 
-      - name: Set up gcloud SDK
+      - name: Setup gcloud SDK
         uses: google-github-actions/setup-gcloud@v2
+
+      - name: "Use gcloud CLI"
+        uses: gcloud info
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
-        id: setup
         with:
           version: ${{ env.PACKER_VERSION }}
 
-      - name: Run `packer build`
-        id: build
+      - name: Build the custom image using Packer
         run: |
           packer init .
           packer build .

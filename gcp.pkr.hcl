@@ -12,9 +12,9 @@ variable "project_id" {
   default = "true-server-412502"
 }
 
-variable "source_image" {
+variable "source_image_family" {
   type    = string
-  default = "centos-stream-8-v20240222"
+  default = "centos-stream-8"
 }
 
 variable "zone" {
@@ -44,7 +44,7 @@ variable "service_file_path" {
 
 source "googlecompute" "csye6225-app-custom-image" {
   project_id              = var.project_id
-  source_image            = var.source_image
+  source_image_family     = var.source_image_family
   zone                    = var.zone
   disk_size               = var.disk_size
   disk_type               = var.disk_type
