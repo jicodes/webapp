@@ -70,4 +70,6 @@ jobs:
 
       - name: Run `packer build`
         id: build
-        run: packer build .
+        run: |
+          packer init .
+          packer build .
