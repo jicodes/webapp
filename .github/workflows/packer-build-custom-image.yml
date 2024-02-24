@@ -52,7 +52,7 @@ jobs:
 
       - name: Build the application
         run: |
-          GOOS=linux GOARCH=amd64 go build -o webapp
+          go build -ldflags="-linkmode external -extldflags -static" -o webapp
           echo "Application built successfully"
 
       - name: Authenticate Packer to Google Cloud via service sccount key
