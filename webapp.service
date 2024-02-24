@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=d
-Group=d
+User=csye6225
+Group=csye6225
 WorkingDirectory=/opt/myapp
 ExecStart=/opt/myapp/webapp
 Restart=always
