@@ -51,7 +51,7 @@ jobs:
         run: go test -v ./...
 
       - name: Build the application
-        run: go build -o webapp
+        run: GOOS=linux GOARCH=amd64 go build -o webapp
 
       - name: Authenticate Packer to Google Cloud via service sccount key
         uses: google-github-actions/auth@v2

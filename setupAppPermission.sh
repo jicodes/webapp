@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change ownership
-sudo chown csye6225:csye6225 /opt/myapp/webapp
+sudo chown d:d /opt/myapp/webapp
 
 # Change permissions
-sudo chmod 700 /opt/myapp/webapp
+sudo chmod 777 /opt/myapp/webapp

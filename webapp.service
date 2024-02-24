@@ -4,10 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=csye6225
-Group=csye6225
+User=d
+Group=d
 WorkingDirectory=/opt/myapp
-ExecStart=/usr/bin/go run .
+ExecStart=/opt/myapp/webapp
 Restart=always
 RestartSec=3
 StandardOutput=syslog

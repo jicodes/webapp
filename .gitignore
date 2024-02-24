@@ -5,6 +5,7 @@
 .env
 
 # Binaries for programs and plugins
+webapp
 *.exe
 *.out
 *.dll
