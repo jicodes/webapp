@@ -4,8 +4,5 @@
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
 
-# Start the service
-sudo systemctl start webapp.service
-
-# Check the status of the service
-sudo systemctl status webapp.service
+# log output from the service
+journalctl -u webapp.service

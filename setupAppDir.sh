@@ -4,6 +4,6 @@ set -e
 
 DIR="/opt/myapp"
 
-sudo mkdir -p "${DIR}" # Create the directory
+sudo mkdir -p "${DIR}"
 
-sudo chown -R packer:packer "${DIR}" # Change the owner of the directory to 'packer'
+sudo chown -R packer:packer "${DIR}" 
