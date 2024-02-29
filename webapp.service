@@ -6,8 +6,8 @@ After=network.target
 Type=simple
 User=csye6225
 Group=csye6225
+Environment="ENV=cloud"
 WorkingDirectory=/opt/myapp
-
 ExecStart=/opt/myapp/webapp
 Restart=always
 RestartSec=3
