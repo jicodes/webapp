@@ -32,9 +32,14 @@ variable "disk_type" {
   default = "pd-standard"
 }
 
-variable "webapp_path" {
+variable "app_path" {
   type    = string
   default = "webapp"
+}
+
+variable "app_properties_path" {
+  type    = string
+  default = "app.properties"
 }
 
 variable "service_file_path" {
@@ -68,9 +73,9 @@ build {
     script = "setupGolang.sh"
   }
 
-  provisioner "shell" {
-    script = "setupDB.sh"
-  }
+  // provisioner "shell" {
+  //   script = "setupDB.sh"
+  // }
 
   provisioner "shell" {
     script = "setupVmUser.sh"
@@ -81,8 +86,13 @@ build {
   }
 
   provisioner "file" {
-    source      = var.webapp_path
+    source      = var.app_path
     destination = "/opt/myapp/webapp"
+  }
+
+  provisioner "file" {
+    source      = var.app_properties_path
+    destination = "/opt/myapp/app.properties"
   }
 
   provisioner "shell" {

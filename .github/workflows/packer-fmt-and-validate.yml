@@ -18,13 +18,13 @@ jobs:
         with:
           version: ${{ env.PACKER_VERSION }}
 
-      - name: Run `packer init`
-        id: init
-        run: packer init .
-
       - name: Run `packer fmt`
         id: fmt
         run: packer fmt -check .
+
+      - name: Run `packer init`
+        id: init
+        run: packer init .
 
       - name: Mock app for `packer validate`
         run: touch webapp

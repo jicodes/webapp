@@ -5,13 +5,14 @@ on:
     types:
       - closed
 
-env:
-  PACKER_VERSION: "1.10.1"
-
 jobs:
   packer-build-custom-image:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    env:
+      ENV: "github"
+      GO_VERSION: "1.21.6"
+      PACKER_VERSION: "1.10.1"
 
     services:
       postgres:
@@ -38,14 +39,27 @@ jobs:
       - name: Set up Go 1.21.6
         uses: actions/setup-go@v5.0.0
         with:
-          go-version: "1.21.6"
+          go-version: ${{ env.GO_VERSION }}
       - run: go version
 
       - name: Get all dependencies based on go.mod
         run: go mod download
 
-      - name: Setup environment variables
-        run: echo "DB_DSN=host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable" >> $GITHUB_ENV
+      - name: Setup github runner environment variables for integration tests
+        run: |
+          { 
+            echo "DB_HOST=localhost"; 
+            echo "DB_PORT=5432"; 
+            echo "DB_USER=postgres"; 
+            echo "DB_PASSWORD=postgres"; 
+            echo "DB_NAME=postgres" 
+          } >> $GITHUB_ENV
+
+      - name: Print Environment Variable for debugging
+        run: echo "ENV=${{ env.ENV }}"
+
+      - name: Enable Debug Logging
+        run: echo "::debug::Debug logging enabled"
 
       - name: Run integration tests
         run: go test -v ./...
@@ -59,7 +73,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.PACKER_SERVICE_ACCOUNT}}
-      
+
       - name: Setup `gcloud SDK`
         uses: google-github-actions/setup-gcloud@v2
 
