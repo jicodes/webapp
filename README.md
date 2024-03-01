@@ -4,7 +4,6 @@
 
 - Go 1.21.6
 - Postgres 16
-- test
 
 ## Packages Installation
 
