@@ -8,6 +8,7 @@ User=csye6225
 Group=csye6225
 Environment="ENV=cloud"
 WorkingDirectory=/opt/myapp
+ExecStartPre=/bin/bash -c "until grep -q 'APPENDED' /opt/myapp/app.properties; do sleep 1; done"
 ExecStart=/opt/myapp/webapp
 Restart=always
 RestartSec=3
