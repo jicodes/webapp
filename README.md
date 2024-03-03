@@ -24,3 +24,16 @@ go get -u golang.org/x/crypto/bcrypt
 # for testing
 go get github.com/stretchr/testify
 ```
+
+## Note
+
+1. We need use cross build for Go app to build then run on a different environment.
+
+```sh
+# for local dev: build on local machine(MacOS) and run on VM server (Linux-CentOS)
+GOOS=linux GOARCH=amd64 go build -o webapp
+
+# for workflow: build in Github actions runner (latest-Ubuntu) and run on VM server (Linux-CentOS)
+# use static linking to create a standalone binary that doesn't depend on dynamic libraries.
+go build -ldflags="-linkmode external -extldflags -static" -o webapp
+```
