@@ -2,12 +2,14 @@ package initializers
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/jicodes/webapp/internals/logger"
 	"github.com/joho/godotenv"
 )
+
+var initializersLogger = logger.GetLogger().With().Str("service", "initializers").Logger()
 
 func LoadVariables() {	
 
@@ -22,7 +24,7 @@ func LoadVariables() {
 		err := godotenv.Load()
 
 		if err != nil {
-			log.Fatal("Error loading .env file")
+			initializersLogger.Error().Err(err).Msg("Error loading .env file")
 		}
 	}
 }
@@ -30,7 +32,7 @@ func LoadVariables() {
 func LoadAppProperties() {
 	file, err := os.Open("/opt/myapp/app.properties")
 	if err != nil {
-		log.Fatal("Error opening app.properties file")
+		initializersLogger.Error().Err(err).Msg("Error opening app.properties file")
 	}
 	defer file.Close()
 
@@ -47,6 +49,6 @@ func LoadAppProperties() {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal("Error reading app.properties file")
+		initializersLogger.Error().Err(err).Msg("Error reading app.properties file")
 	}
 }
