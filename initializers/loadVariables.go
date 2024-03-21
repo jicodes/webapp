@@ -2,6 +2,7 @@ package initializers
 
 import (
 	"bufio"
+	"log"
 	"os"
 	"strings"
 
@@ -24,7 +25,7 @@ func LoadVariables() {
 		err := godotenv.Load()
 
 		if err != nil {
-			initializersLogger.Error().Err(err).Msg("Error loading .env file")
+			log.Fatal("Error loading .env file")
 		}
 	}
 }
@@ -50,5 +51,6 @@ func LoadAppProperties() {
 
 	if err := scanner.Err(); err != nil {
 		initializersLogger.Error().Err(err).Msg("Error reading app.properties file")
-	}
+	} else {
+		initializersLogger.Info().Msg("Loaded app.properties file")}
 }

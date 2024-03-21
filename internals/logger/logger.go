@@ -16,6 +16,7 @@ func InitLogger() {
 	defer file.Close()
 
 	logger = zerolog.New(file).With().Timestamp().Logger()
+	logger.Info().Msg("Logger initialized")
 }
 
 func GetLogger() zerolog.Logger {
