@@ -6,11 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jicodes/webapp/internals/logger"
 	"github.com/joho/godotenv"
+	"github.com/jicodes/webapp/internals/logger"
 )
-
-var initializersLogger = logger.GetLogger().With().Str("service", "initializers").Logger()
 
 func LoadVariables() {	
 
@@ -33,7 +31,7 @@ func LoadVariables() {
 func LoadAppProperties() {
 	file, err := os.Open("/opt/myapp/app.properties")
 	if err != nil {
-		initializersLogger.Error().Err(err).Msg("Error opening app.properties file")
+		logger.Logger.Error().Err(err).Msg("Error opening app.properties file")
 	}
 	defer file.Close()
 
@@ -50,7 +48,7 @@ func LoadAppProperties() {
 	}
 
 	if err := scanner.Err(); err != nil {
-		initializersLogger.Error().Err(err).Msg("Error reading app.properties file")
+		logger.Logger.Error().Err(err).Msg("Error reading app.properties file")
 	} else {
-		initializersLogger.Info().Msg("Loaded app.properties file")}
+		logger.Logger.Info().Msg("Loaded app.properties file")}
 }

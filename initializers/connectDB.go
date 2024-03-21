@@ -6,6 +6,8 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"github.com/jicodes/webapp/internals/logger"
 )
 
 var DB *gorm.DB 
@@ -24,8 +26,8 @@ func ConnectDB() () {
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		initializersLogger.Error().Err(err).Msg("Error connecting to database")
+		logger.Logger.Error().Err(err).Msg("Error connecting to database")
 	} else {
-		initializersLogger.Info().Msg("Connected to database")
+		logger.Logger.Info().Msg("Connected to database")
 	}
 }

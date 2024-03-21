@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var logger zerolog.Logger
+var Logger zerolog.Logger
 
 func InitLogger() {
 	file, err := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
@@ -15,10 +15,6 @@ func InitLogger() {
 	}
 	defer file.Close()
 
-	logger = zerolog.New(file).With().Timestamp().Logger()
-	logger.Info().Msg("Logger initialized")
-}
-
-func GetLogger() zerolog.Logger {
-	return logger
+	Logger = zerolog.New(file).With().Timestamp().Logger()
+	Logger.Info().Msg("Logger initialized")
 }

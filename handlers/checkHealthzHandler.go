@@ -8,8 +8,6 @@ import (
 	"github.com/jicodes/webapp/internals/logger"
 )
 
-var handlersLogger = logger.GetLogger().With().Str("service", "handlers").Logger()
-
 func CheckHealthz(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 	c.Header("Pragma", "no-cache")
@@ -17,9 +15,9 @@ func CheckHealthz(c *gin.Context) {
 
 	if err := initializers.DB.Exec("SELECT 1").Error; err == nil {
 		c.Status(http.StatusOK)
-		handlersLogger.Info().Msg("Health check passed: 200 OK")
+		logger.Logger.Info().Msg("Health check passed: 200 OK")
 	} else {
 		c.Status(http.StatusServiceUnavailable)
-		handlersLogger.Error().Err(err).Msg("Health check failed: 503 Service Unavailable")
+		logger.Logger.Error().Err(err).Msg("Health check failed: 503 Service Unavailable")
 	}
 }
