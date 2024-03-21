@@ -47,6 +47,11 @@ variable "service_file_path" {
   default = "webapp.service"
 }
 
+variable "opsagent_config_file_path" {
+  type    = string
+  default = "config.yaml"
+}
+
 source "googlecompute" "csye6225-app-custom-image" {
   project_id              = var.project_id
   source_image_family     = var.source_image_family
@@ -114,5 +119,24 @@ build {
 
   provisioner "shell" {
     script = "setupAppService.sh"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh",
+      "sudo bash add-google-cloud-ops-agent-repo.sh --also-install"
+    ]
+  }
+
+  provisioner "file" {
+    source      = var.opsagent_config_file_path
+    destination = "/tmp/config.yaml"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo mv /tmp/config.yaml /etc/google-cloud-ops-agent/config.yaml",
+      "sudo systemctl restart google-cloud-ops-agent"
+    ]
   }
 }

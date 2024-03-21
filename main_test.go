@@ -11,10 +11,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jicodes/webapp/initializers"
-	"github.com/jicodes/webapp/models"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/jicodes/webapp/initializers"
+	"github.com/jicodes/webapp/models"
 )
 
 const (

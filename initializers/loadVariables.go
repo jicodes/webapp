@@ -30,7 +30,7 @@ func LoadVariables() {
 func LoadAppProperties() {
 	file, err := os.Open("/opt/myapp/app.properties")
 	if err != nil {
-		log.Fatal("Error opening app.properties file:", err)
+		log.Fatal("Error opening app.properties file")
 	}
 	defer file.Close()
 
@@ -47,6 +47,6 @@ func LoadAppProperties() {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal("Error reading app.properties file:", err)
+		log.Fatal("Error reading app.properties file")
 	}
 }

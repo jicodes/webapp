@@ -1,4 +1,4 @@
-package controllers
+package handlers
 
 import (
 	"net/http"
@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/jicodes/webapp/initializers"
 	"github.com/jicodes/webapp/models"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func CreateUser(c *gin.Context) {

@@ -4,11 +4,10 @@
 
 - Go 1.21.6
 - Postgres 16
-- 
 
 ## Packages Installation
 
-```sh
+````sh
 # for web server and routing - Gin
 go get -u github.com/gin-gonic/gin
 
@@ -24,7 +23,9 @@ go get -u golang.org/x/crypto/bcrypt
 
 # for testing
 go get github.com/stretchr/testify
-```
+
+# for logging
+go get -u github.com/rs/zerolog/log
 
 ## Note
 
@@ -37,4 +38,4 @@ GOOS=linux GOARCH=amd64 go build -o webapp
 # for workflow: build in Github actions runner (latest-Ubuntu) and run on VM server (Linux-CentOS)
 # use static linking to create a standalone binary that doesn't depend on dynamic libraries.
 go build -ldflags="-linkmode external -extldflags -static" -o webapp
-```
+````
