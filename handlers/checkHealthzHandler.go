@@ -1,12 +1,14 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jicodes/webapp/initializers"
+	"github.com/jicodes/webapp/internals/logger"
 )
+
+var handlersLogger = logger.GetLogger().With().Str("service", "handlers").Logger()
 
 func CheckHealthz(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -15,9 +17,9 @@ func CheckHealthz(c *gin.Context) {
 
 	if err := initializers.DB.Exec("SELECT 1").Error; err == nil {
 		c.Status(http.StatusOK)
-		log.Println("Health check passed: 200 OK, DB is up and running")
+		handlersLogger.Info().Msg("Health check passed: 200 OK")
 	} else {
 		c.Status(http.StatusServiceUnavailable)
-		log.Fatal("Health check failed: 503 Service Unavailable, DB is down or not reachable")
+		handlersLogger.Error().Err(err).Msg("Health check failed: 503 Service Unavailable")
 	}
 }
