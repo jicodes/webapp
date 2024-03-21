@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jicodes/webapp/initializers"
+	"github.com/jicodes/webapp/internals/logger"
 	"github.com/jicodes/webapp/models"
 )
 
@@ -75,7 +76,8 @@ func CreateUser(c *gin.Context) {
 		AccountUpdated: newUser.AccountUpdated,
 	}
 
-	c.JSON(http.StatusCreated, publicUser) 
+	c.JSON(http.StatusCreated, publicUser)
+	logger.Logger.Info().Msg("User created successfully") 
 }
 
 func GetUser(c *gin.Context) {
