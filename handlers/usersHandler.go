@@ -2,18 +2,26 @@ package handlers
 
 import (
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jicodes/webapp/initializers"
-	"github.com/jicodes/webapp/internals/logger"
 	"github.com/jicodes/webapp/models"
 )
 
 func CreateUser(c *gin.Context) {
+	logFile, logErr := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
+	if logErr != nil {
+		panic(logErr)
+	}
+	defer logFile.Close()
+	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+
 	var body struct {
 		FirstName string `json:"first_name"`
 		LastName string `json:"last_name"`
@@ -32,15 +40,19 @@ func CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{ //400
 			"error": "Username must be a valid email",
 		})
+
+		logger.Error().Msg("Username must be a valid email")
 		return
 	}
 
 	var existingUser models.User
-	existence := initializers.DB.First(&existingUser, "username = ?", body.Username)
-	if existence.Error == nil {
+	err := initializers.DB.First(&existingUser, "username = ?", body.Username).Error
+	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{ //400
 			"error": "User already exists",
 		})
+
+		logger.Error().Msg("User already exists")
 		return
 	}
 
@@ -77,12 +89,18 @@ func CreateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, publicUser)
-	logger.Logger.Info().Msg("User created successfully") 
+	logger.Info().Msg("User created successfully") 
 }
 
 func GetUser(c *gin.Context) {
-	user := c.MustGet("user").(models.User)
+	logFile, logErr := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
+	if logErr != nil {
+		panic(logErr)
+	}
+	defer logFile.Close()
+	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
+	user := c.MustGet("user").(models.User)
 	public := models.PublicUser{
 		ID:             user.ID,
 		FirstName:      user.FirstName,
@@ -92,17 +110,25 @@ func GetUser(c *gin.Context) {
 		AccountUpdated: user.AccountUpdated,
 	}
 	c.JSON(http.StatusOK, public) //200
+	logger.Info().Msg("User retrieved successfully")
 }
 
 func UpdateUser(c *gin.Context) {
-	user := c.MustGet("user").(models.User)
+	logFile, logErr := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
+	if logErr != nil {
+		panic(logErr)
+	}
+	defer logFile.Close()
+	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
+	user := c.MustGet("user").(models.User)
   var updated models.User
 
   if c.ShouldBindJSON(&updated) != nil {
     c.JSON(http.StatusBadRequest, gin.H{
-      "error": "Failed to read request body",
+      "error": "Request body should be  be in JSON format",
     })
+		logger.Error().Msg("Request body should be in JSON format")
     return
   }
 
@@ -111,6 +137,7 @@ func UpdateUser(c *gin.Context) {
     c.JSON(http.StatusBadRequest, gin.H{ //400
       "error": "You can only update the fields of FirstName, LastName and Password",
     })
+		logger.Error().Msg("Disallowed fields in the request body")
     return
   }
 
@@ -140,8 +167,10 @@ func UpdateUser(c *gin.Context) {
     c.JSON(http.StatusBadRequest, gin.H{
       "error": "Failed to update user",
     })
+		logger.Error().Msg("Failed to update user")
     return
   }
 
   c.JSON(http.StatusOK, user)
+	logger.Info().Msg("User updated successfully")
 }

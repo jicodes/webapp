@@ -5,13 +5,10 @@ import (
 
 	"github.com/jicodes/webapp/handlers"
 	"github.com/jicodes/webapp/initializers"
-	"github.com/jicodes/webapp/internals/logger"
 	"github.com/jicodes/webapp/middlewares"
 )
 
-func init () {
-	logger.InitLogger()
-	
+func init () {	
 	initializers.LoadVariables()
 	initializers.ConnectDB()
 	initializers.SyncDB()

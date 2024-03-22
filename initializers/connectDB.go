@@ -4,15 +4,21 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"github.com/jicodes/webapp/internals/logger"
 )
 
 var DB *gorm.DB 
 
 func ConnectDB() () {
+
+	logFile, logErr := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
+	if logErr != nil {
+		panic(logErr)
+	}
+	defer logFile.Close()
+	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
@@ -26,8 +32,8 @@ func ConnectDB() () {
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		logger.Logger.Error().Err(err).Msg("Error connecting to database")
+		logger.Error().Err(err).Msg("Error connecting to database")
 	} else {
-		logger.Logger.Info().Msg("Connected to database")
+		logger.Info().Msg("Connected to database")
 	}
 }

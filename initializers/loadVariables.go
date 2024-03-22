@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	"github.com/jicodes/webapp/internals/logger"
+	"github.com/rs/zerolog"
 )
 
 func LoadVariables() {	
@@ -29,9 +29,16 @@ func LoadVariables() {
 }
 
 func LoadAppProperties() {
+	logFile, err := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+
 	file, err := os.Open("/opt/myapp/app.properties")
 	if err != nil {
-		logger.Logger.Error().Err(err).Msg("Error opening app.properties file")
+		logger.Error().Err(err).Msg("Error opening app.properties file")
 	}
 	defer file.Close()
 
@@ -48,7 +55,7 @@ func LoadAppProperties() {
 	}
 
 	if err := scanner.Err(); err != nil {
-		logger.Logger.Error().Err(err).Msg("Error reading app.properties file")
+		logger.Error().Err(err).Msg("Error reading app.properties file")
 	} else {
-		logger.Logger.Info().Msg("Loaded app.properties file")}
+		logger.Info().Msg("Loaded app.properties file")}
 }
