@@ -115,6 +115,31 @@ func CreateUser(c *gin.Context) {
 	}
 }
 
+func VerifyEmail(c *gin.Context) {
+	logFile, logErr := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
+	if logErr != nil {
+		panic(logErr)
+	}
+	defer logFile.Close()
+	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+
+	user := c.MustGet("user").(models.User)
+	user.Verified = true
+	result := initializers.DB.Save(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{ //400
+			"error": "Failed to mark user as verified",
+		})
+		logger.Error().Msg("Failed to mark user as verified")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User email verified successfully",
+	})
+	logger.Info().Msg("User email verified successfully")
+}
+
 func GetUser(c *gin.Context) {
 	logFile, logErr := os.OpenFile("/tmp/webapp.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
 	if logErr != nil {

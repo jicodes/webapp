@@ -22,12 +22,12 @@ func setupRouter() *gin.Engine {
 	r.GET("/healthz", handlers.CheckHealthz)
 	r.POST("/v1/user", handlers.CreateUser)
 
-	authGroup := r.Group("/v1/user/self")
+	authGroup := r.Group("/v1/user")
 	authGroup.Use(middlewares.BasicAuth())  
-	authGroup.Use(middlewares.NeedVerify()) 
 	{
-		authGroup.GET("", handlers.GetUser)
-		authGroup.PUT("", handlers.UpdateUser)
+		authGroup.POST("/verify", handlers.VerifyEmail)
+		authGroup.GET("/self", middlewares.NeedVerify(), handlers.GetUser)
+		authGroup.PUT("/self", middlewares.NeedVerify(), handlers.UpdateUser)
 	}
 
 	return r
