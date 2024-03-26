@@ -12,6 +12,7 @@ type User struct {
     LastName       string    `gorm:"not null" json:"last_name"`
     Password       string    `gorm:"not null" json:"password"`
     Username       string    `gorm:"unique;not null" json:"username"`
+    Verified       bool      `gorm:"default:false" json:"verified"`
     AccountCreated time.Time `gorm:"default:current_timestamp" json:"account_created"`
     AccountUpdated time.Time `gorm:"default:current_timestamp" json:"account_updated"`
 }
@@ -21,6 +22,7 @@ type PublicUser struct {
     FirstName      string    `json:"first_name"`
     LastName       string    `json:"last_name"`
     Username       string    `json:"username"`
+    Verified       bool      `json:"verified"`
     AccountCreated time.Time `json:"account_created"`
     AccountUpdated time.Time `json:"account_updated"`
 }

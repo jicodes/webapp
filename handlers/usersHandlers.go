@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/jicodes/webapp/initializers"
 	"github.com/jicodes/webapp/models"
+	"github.com/jicodes/webapp/utils"
 )
 
 func CreateUser(c *gin.Context) {
@@ -45,8 +47,8 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	var existingUser models.User
-	err := initializers.DB.First(&existingUser, "username = ?", body.Username).Error
+	var user models.User
+	err := initializers.DB.First(&user, "username = ?", body.Username).Error
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{ //400
 			"error": "User already exists",
@@ -84,12 +86,33 @@ func CreateUser(c *gin.Context) {
 		FirstName:      newUser.FirstName,
 		LastName:       newUser.LastName,
 		Username:       newUser.Username,
+		Verified:       newUser.Verified,
 		AccountCreated: newUser.AccountCreated,
 		AccountUpdated: newUser.AccountUpdated,
 	}
 
 	c.JSON(http.StatusCreated, publicUser)
 	logger.Info().Msg("User created successfully") 
+
+	// Publish message to Pub/Sub
+	projectID := "true-server-412502"
+  topicID := "verify_email" 
+  userMsg, err := json.Marshal(publicUser)
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to marshal user data when publishing message to Pub/Sub")
+		return
+	}
+
+	id, err := utils.PublishMessage(
+    projectID,
+    topicID,
+    string(userMsg),
+  )
+  if err != nil {
+		logger.Error().Err(err).Msg("Failed to publish message to Pub/Sub")
+  } else {
+		logger.Info().Str("message-id", id).Msg("Message published to Pub/Sub")
+	}
 }
 
 func GetUser(c *gin.Context) {
@@ -121,9 +144,7 @@ func UpdateUser(c *gin.Context) {
 	defer logFile.Close()
 	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
-	user := c.MustGet("user").(models.User)
   var updated models.User
-
   if c.ShouldBindJSON(&updated) != nil {
     c.JSON(http.StatusBadRequest, gin.H{
       "error": "Request body should be  be in JSON format",
@@ -148,6 +169,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	// Update the user successfully
+	user := c.MustGet("user").(models.User)
 	user.FirstName = updated.FirstName
 	user.LastName = updated.LastName
 	if updated.Password != "" {

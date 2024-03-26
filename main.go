@@ -21,8 +21,14 @@ func setupRouter() *gin.Engine {
 
 	r.GET("/healthz", handlers.CheckHealthz)
 	r.POST("/v1/user", handlers.CreateUser)
-	r.GET("/v1/user/self", middlewares.BasicAuth(), handlers.GetUser)
-	r.PUT("/v1/user/self", middlewares.BasicAuth(), handlers.UpdateUser)
+
+	authGroup := r.Group("/v1/user/self")
+	authGroup.Use(middlewares.BasicAuth())  
+	authGroup.Use(middlewares.NeedVerify()) 
+	{
+		authGroup.GET("", handlers.GetUser)
+		authGroup.PUT("", handlers.UpdateUser)
+	}
 
 	return r
 }

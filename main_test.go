@@ -48,6 +48,18 @@ func setupUser(router *gin.Engine, firstName, lastName, password, username strin
 			return createUserResp.Code, fmt.Errorf("Failed to create user: status code %v", createUserResp.Code)
 	}
 
+	// Mark the user as verified
+	user := models.User{}
+	err = initializers.DB.First(&user, "username = ?", username).Error
+	if err != nil {
+			return createUserResp.Code, fmt.Errorf("Failed to find user: %v", err)
+	}
+	user.Verified = true
+	err = initializers.DB.Save(&user).Error
+	if err != nil {
+			return createUserResp.Code, fmt.Errorf("Failed to mark user as verified: %v", err)
+	}
+
 	return createUserResp.Code, nil
 }
 
