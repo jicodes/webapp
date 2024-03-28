@@ -123,14 +123,40 @@ func VerifyEmail(c *gin.Context) {
 	defer logFile.Close()
 	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
-	user := c.MustGet("user").(models.User)
+	
+	//user := c.MustGet("user").(models.User)
+
+	verificationToken := c.Query("token")
+	if verificationToken == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Verification token is required",
+		})
+		return
+	}
+
+	var user models.User
+	result := initializers.DB.Where("verification_token = ?", verificationToken).First(&user)
+	if result.Error != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+					"error": "Invalid verification token",
+			})
+			return
+	}
+
+	if time.Now().After(user.VerificationTokenCreated.Add(2 * time.Minute)) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Verification token has expired",
+	})
+		return
+	}
+
 	user.Verified = true
-	result := initializers.DB.Save(&user)
+	result = initializers.DB.Save(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ //400
-			"error": "Failed to mark user as verified",
+			"error": "Failed to save user as verified",
 		})
-		logger.Error().Msg("Failed to mark user as verified")
+		logger.Error().Msg("Failed to save user as verified")
 		return
 	}
 

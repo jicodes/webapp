@@ -16,18 +16,17 @@ func init () {
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	r.Use(middlewares.CheckRequestMethod())
-	r.Use(middlewares.CheckPayload())
 
-	r.GET("/healthz", handlers.CheckHealthz)
+	r.Any("/healthz", middlewares.CheckRequestMethod(), middlewares.CheckPayload(), handlers.CheckHealthz)
 	r.POST("/v1/user", handlers.CreateUser)
+	r.POST("/v1/user/verify/:token", handlers.VerifyEmail)
 
-	authGroup := r.Group("/v1/user")
-	authGroup.Use(middlewares.BasicAuth())  
+	userGroup := r.Group("/v1/user")
+	userGroup.Use(middlewares.BasicAuth())  
+	userGroup.Use(middlewares.NeedVerify())  
 	{
-		authGroup.POST("/verify", handlers.VerifyEmail)
-		authGroup.GET("/self", middlewares.NeedVerify(), handlers.GetUser)
-		authGroup.PUT("/self", middlewares.NeedVerify(), handlers.UpdateUser)
+		userGroup.GET("/self", handlers.GetUser)
+		userGroup.PUT("/self", handlers.UpdateUser)
 	}
 
 	return r

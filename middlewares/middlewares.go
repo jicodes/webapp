@@ -23,7 +23,7 @@ func CheckRequestMethod() gin.HandlerFunc {
 		defer logFile.Close()
 		logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
-		if c.Request.URL.Path == "/healthz" && c.Request.Method != http.MethodGet {
+		if c.Request.Method != http.MethodGet {
 			c.AbortWithStatus(http.StatusMethodNotAllowed)
 			logger.Error().Msg("Method for healthz api not allowed")
 			return
@@ -41,7 +41,7 @@ func CheckPayload() gin.HandlerFunc {
 		defer logFile.Close()
 		logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
-		if c.Request.URL.Path == "/healthz" && (c.Request.ContentLength > 0 || len(c.Request.URL.Query()) > 0) {
+		if c.Request.ContentLength > 0 || len(c.Request.URL.Query()) > 0 {
 			c.AbortWithStatus(http.StatusBadRequest)
 			logger.Error().Msg("Payload for healthz api not allowed")
 			return
