@@ -123,9 +123,6 @@ func VerifyEmail(c *gin.Context) {
 	defer logFile.Close()
 	logger := zerolog.New(logFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 
-	
-	//user := c.MustGet("user").(models.User)
-
 	verificationToken := c.Query("token")
 	if verificationToken == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
