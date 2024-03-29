@@ -125,41 +125,34 @@ func VerifyEmail(c *gin.Context) {
 
 	verificationToken := c.Query("token")
 	if verificationToken == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Verification token is required",
-		})
+		logger.Error().Msg("Verification failed, token is missing")
+		c.String(http.StatusBadRequest, "error: Verification failed, token is missing")
 		return
 	}
 
 	var user models.User
 	result := initializers.DB.Where("verification_token = ?", verificationToken).First(&user)
 	if result.Error != nil {
-			c.JSON(http.StatusNotFound, gin.H{
-					"error": "Invalid verification token",
-			})
-			return
+		logger.Error().Msg("Invalid verification token")
+		c.String(http.StatusNotFound, "error: Invalid verification token")	
+		return
 	}
 
 	if time.Now().After(user.VerificationTokenCreated.Add(2 * time.Minute)) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Verification token has expired",
-	})
+		logger.Error().Msg("Verification failed, token has expired")
+		c.String(http.StatusBadRequest, "error: Verification failed, token has expired")
 		return
 	}
 
 	user.Verified = true
-	result = initializers.DB.Save(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{ //400
-			"error": "Failed to save user as verified",
-		})
-		logger.Error().Msg("Failed to save user as verified")
+	err := initializers.DB.Save(&user).Error
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to save user as verified")
+		c.String(http.StatusBadRequest, "error: Failed to save user as verified")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "User email verified successfully",
-	})
+	c.String(http.StatusOK, "message: User email verified successfully")
 	logger.Info().Msg("User email verified successfully")
 }
 
