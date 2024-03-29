@@ -19,7 +19,7 @@ func setupRouter() *gin.Engine {
 
 	r.Any("/healthz", middlewares.CheckRequestMethod(), middlewares.CheckPayload(), handlers.CheckHealthz)
 	r.POST("/v1/user", handlers.CreateUser)
-	r.POST("/v1/user/verify/:token", handlers.VerifyEmail)
+	r.GET("/v1/user/verify/", handlers.VerifyEmail)
 
 	userGroup := r.Group("/v1/user")
 	userGroup.Use(middlewares.BasicAuth())  
