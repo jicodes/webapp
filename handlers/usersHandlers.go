@@ -138,6 +138,12 @@ func VerifyEmail(c *gin.Context) {
 		return
 	}
 
+	if user.Verified {
+		logger.Info().Msg("User is already verified")
+		c.String(http.StatusOK, "message: User is already verified")
+		return
+	}
+
 	if time.Now().After(user.VerificationTokenCreated.Add(2 * time.Minute)) {
 		logger.Error().Msg("Verification failed, token has expired")
 		c.String(http.StatusBadRequest, "error: Verification failed, token has expired")
