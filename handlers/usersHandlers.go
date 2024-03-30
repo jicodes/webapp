@@ -176,10 +176,13 @@ func GetUser(c *gin.Context) {
 		FirstName:      user.FirstName,
 		LastName:       user.LastName,
 		Username:       user.Username,
+		Verified:       user.Verified,
+		VerificationToken: user.VerificationToken,
+		VerificationTokenCreated: user.VerificationTokenCreated,
 		AccountCreated: user.AccountCreated,
 		AccountUpdated: user.AccountUpdated,
 	}
-	c.JSON(http.StatusOK, public) //200
+	c.JSON(http.StatusOK, public) 
 	logger.Info().Msg("User retrieved successfully")
 }
 
