@@ -67,7 +67,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_FOR_GITHUB_ACTIONS_CREDENTIALS }}
-      
+
       - name: Set up gcloud Cloud SDK environment
         uses: google-github-actions/setup-gcloud@v2
 
@@ -111,4 +111,28 @@ jobs:
                   echo "$FLAG"
                 } | sudo tee -a "$ENV_FILE" > /dev/null
               fi'
-              
+
+      - name: Configure instance group to use new template
+        run: |
+          NEW_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates describe ${NEW_TEMPLATE_NAME} \
+            --region=${{ secrets.REGION }} \
+            --format="value(selfLink)")
+          INSTANCE_GROUP_NAME=$(gcloud compute instance-groups managed list --region=${{ secrets.REGION }} --format="value(name)")
+          gcloud compute instance-groups managed set-instance-template ${INSTANCE_GROUP_NAME} \
+            --template=${NEW_TEMPLATE_SELF_LINK} \
+            --region=${{ secrets.REGION }}
+
+      - name: Make managed instance group to start basic rolling update
+        run: |
+          gcloud compute instance-groups managed rolling-action start-update ${INSTANCE_GROUP_NAME} \
+            --version=template=${NEW_TEMPLATE_NAME} \
+            --region=${{ secrets.REGION }} \
+            --min-ready=3m \
+            --max-unavailable=3
+
+      - name: Wait for update to complete
+        run: |
+          while [[ $(gcloud compute instance-groups managed describe ${NEW_TEMPLATE_NAME} --region ${{secrets.REGION}} --format="get(status.isStable)") != "True" ]]; do
+            echo "The update is still in progress"
+            sleep 10
+          done
