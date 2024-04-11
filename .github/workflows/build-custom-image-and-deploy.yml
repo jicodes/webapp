@@ -89,7 +89,7 @@ jobs:
           gcloud compute instance-templates create ${NEW_TEMPLATE_NAME} \
             --instance-template-region=${{ secrets.REGION }} \
             --machine-type=${{ secrets.MACHINE_TYPE }} \
-            --image=${NEW_TEMPLATE_NAME} \
+            --image=${LATEST_IMAGE} \
             --boot-disk-kms-key=${{ secrets.KMS_KEY_FOR_VM }} \
             --boot-disk-type=${{ secrets.DISK_TYPE }} \
             --boot-disk-size=${{ secrets.DISK_SIZE }} \
