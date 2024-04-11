@@ -71,18 +71,13 @@ jobs:
       - name: Set up gcloud Cloud SDK environment
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Setup `packer`
-        uses: hashicorp/setup-packer@main
-        with:
-          version: ${{ env.PACKER_VERSION }}
 
-      - name: Build the custom image using Packer
-        run: |
-          packer init .
-          packer build .
+
+
 
       # Start update vm instances
       - name: Create new Instance Template version
+        id: create-instance-template
         run: |
           LATEST_IMAGE=$(gcloud compute images describe-from-family ${{ secrets.IMAGE_FAMILY }} --project=${{ secrets.PROJECT_ID }} --format="get(name)")
           NEW_TEMPLATE_NAME="instance-template-$(date +%Y%m%d%H%M%S)"
@@ -111,10 +106,11 @@ jobs:
                   echo "$FLAG"
                 } | sudo tee -a "$ENV_FILE" > /dev/null
               fi'
+              echo "::set-output name=new_template_name::$NEW_TEMPLATE_NAME"
 
       - name: Configure instance group to use new template
         run: |
-          NEW_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates describe ${NEW_TEMPLATE_NAME} \
+          NEW_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates describe ${steps.create-instance-template.outputs.new_template_name} \
             --region=${{ secrets.REGION }} \
             --format="value(selfLink)")
           INSTANCE_GROUP_NAME=$(gcloud compute instance-groups managed list --region=${{ secrets.REGION }} --format="value(name)")
@@ -125,14 +121,16 @@ jobs:
       - name: Make managed instance group to start basic rolling update
         run: |
           gcloud compute instance-groups managed rolling-action start-update ${INSTANCE_GROUP_NAME} \
-            --version=template=${NEW_TEMPLATE_NAME} \
+            --version=template=${steps.create-instance-template.outputs.new_template_name} \
             --region=${{ secrets.REGION }} \
             --min-ready=3m \
             --max-unavailable=3
 
-      - name: Wait for update to complete
+      - name: Wait for MIG update to complete
         run: |
-          while [[ $(gcloud compute instance-groups managed describe ${NEW_TEMPLATE_NAME} --region ${{secrets.REGION}} --format="get(status.isStable)") != "True" ]]; do
+          while [[ $(gcloud compute instance-groups managed describe ${steps.create-instance-template.outputs.new_template_name} \
+            --region ${{secrets.REGION}} \
+            --format="get(status.isStable)") != "True" ]]; do
             echo "The update is still in progress"
             sleep 10
           done
