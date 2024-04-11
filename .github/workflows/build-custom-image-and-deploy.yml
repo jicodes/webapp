@@ -66,7 +66,7 @@ jobs:
       - name: Authenticate to Google Cloud via service sccount key
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.SERVICE_ACCOUNT_FOR_GITHUB_ACTIONS }}
+          credentials_json: ${{ secrets.SERVICE_ACCOUNT_FOR_GITHUB_ACTIONS_CREDENTIALS }}
       
       - name: Set up gcloud Cloud SDK environment
         uses: google-github-actions/setup-gcloud@v2
