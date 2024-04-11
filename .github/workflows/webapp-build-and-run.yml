@@ -1,4 +1,4 @@
-name: Go webapp workflow
+name: Webapp workflow
 
 on: pull_request
 
