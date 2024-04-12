@@ -125,7 +125,6 @@ jobs:
           gcloud compute instance-groups managed rolling-action start-update ${INSTANCE_GROUP_NAME} \
             --version=template=${NEW_TEMPLATE_SELF_LINK} \
             --region=${{ secrets.REGION }} \
-            --max-unavailable=3
 
       - name: Wait for MIG update to complete
         run: |
