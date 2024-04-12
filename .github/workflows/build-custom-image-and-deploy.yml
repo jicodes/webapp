@@ -79,9 +79,9 @@ jobs:
         id: create-instance-template
         run: |
           LATEST_IMAGE=$(gcloud compute images describe-from-family ${{ secrets.IMAGE_FAMILY }} --project=${{ secrets.PROJECT_ID }} --format="get(name)")
-          new_template_name="instance-template-$(date +%Y%m%d%H%M%S)"
-          echo "NEW_TEMPLATE_NAME=${new_template_name}" >> $GITHUB_ENV
-          gcloud compute instance-templates create ${{env.NEW_TEMPLATE_NAME}} \
+          echo "NEW_TEMPLATE_NAME="instance-template-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo $NEW_TEMPLATE_NAME
+          gcloud compute instance-templates create $NEW_TEMPLATE_NAME \
             --instance-template-region=${{ secrets.REGION }} \
             --machine-type=${{ secrets.MACHINE_TYPE }} \
             --image=${LATEST_IMAGE} \
@@ -106,31 +106,3 @@ jobs:
                   echo "$FLAG"
                 } | sudo tee -a "$ENV_FILE" > /dev/null
               fi'
-
-      - name: Configure instance group to use new template
-        run: |
-          NEW_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates describe ${{env.NEW_TEMPLATE_NAME}} \
-            --region=${{ secrets.REGION }} \
-            --format="value(selfLink)")
-          instance_group_name=$(gcloud compute instance-groups managed list --region=${{ secrets.REGION }} --format="value(name)")
-          echo "INSTANCE_GROUP_NAME=${instance_group_name}" >> $GITHUB_ENV
-          gcloud compute instance-groups managed set-instance-template ${{env.INSTANCE_GROUP_NAME}} \
-            --template=${NEW_TEMPLATE_SELF_LINK} \
-            --region=${{ secrets.REGION }}
-
-      - name: Make managed instance group to start basic rolling update
-        run: |
-          gcloud compute instance-groups managed rolling-action start-update ${{env.INSTANCE_GROUP_NAME}} \
-            --version=template=${{env.NEW_TEMPLATE_NAME}} \
-            --region=${{ secrets.REGION }} \
-            --min-ready=3m \
-            --max-unavailable=3
-
-      - name: Wait for MIG update to complete
-        run: |
-          while [[ $(gcloud compute instance-groups managed describe ${{env.INSTANCE_GROUP_NAME}} \
-            --region ${{secrets.REGION}} \
-            --format="get(status.isStable)") != "True" ]]; do
-            echo "The update is still in progress"
-            sleep 10
-          done
