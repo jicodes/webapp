@@ -79,8 +79,7 @@ jobs:
         id: create-instance-template
         run: |
           LATEST_IMAGE=$(gcloud compute images describe-from-family ${{ secrets.IMAGE_FAMILY }} --project=${{ secrets.PROJECT_ID }} --format="get(name)")
-          echo "NEW_TEMPLATE_NAME="instance-template-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo $NEW_TEMPLATE_NAME
+          echo "NEW_TEMPLATE_NAME=instance-template-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           gcloud compute instance-templates create $NEW_TEMPLATE_NAME \
             --instance-template-region=${{ secrets.REGION }} \
             --machine-type=${{ secrets.MACHINE_TYPE }} \
