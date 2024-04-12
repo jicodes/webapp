@@ -105,3 +105,31 @@ jobs:
                   echo "$FLAG"
                 } | sudo tee -a "$ENV_FILE" > /dev/null
               fi'
+
+      - name: Configure instance group to use new template
+        run: |
+          NEW_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates describe ${NEW_TEMPLATE_NAME} \
+            --region=${{ secrets.REGION }} \
+            --format="get(selfLink)")
+
+          instance_group_name=$(gcloud compute instance-groups managed list --region=${{ secrets.REGION }} --format="value(name)")
+          echo "INSTANCE_GROUP_NAME=$instance_group_name" >> $GITHUB_ENV
+          
+          gcloud compute instance-groups managed set-instance-template ${instance_group_name} \
+            --template=${NEW_TEMPLATE_SELF_LINK} \
+            --region=${{ secrets.REGION }}
+
+      - name: Make managed instance group to start basic rolling update
+        run: |
+          gcloud compute instance-groups managed rolling-action start-update ${INSTANCE_GROUP_NAME} \
+            --version=template=${NEW_TEMPLATE_NAME} \
+            --region=${{ secrets.REGION }} \
+            --min-ready=3m \
+            --max-unavailable=3
+
+      - name: Wait for MIG update to complete
+        run: |
+          while [[ $(gcloud compute instance-groups managed describe ${INSTANCE_GROUP_NAME} --region ${{secrets.REGION}} --format="get(status.isStable)") != "True" ]]; do
+            echo "The update is still in progress"
+            sleep 10
+          done
