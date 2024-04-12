@@ -79,7 +79,8 @@ jobs:
         id: create-instance-template
         run: |
           LATEST_IMAGE=$(gcloud compute images describe-from-family ${{ secrets.IMAGE_FAMILY }} --project=${{ secrets.PROJECT_ID }} --format="get(name)")
-          echo "NEW_TEMPLATE_NAME='instance-template-$(date +%Y%m%d%H%M%S)'" >> $GITHUB_ENV
+          new_template_name="instance-template-$(date +%Y%m%d%H%M%S)"
+          echo "NEW_TEMPLATE_NAME=${new_template_name}" >> $GITHUB_ENV
           gcloud compute instance-templates create ${{env.NEW_TEMPLATE_NAME}} \
             --instance-template-region=${{ secrets.REGION }} \
             --machine-type=${{ secrets.MACHINE_TYPE }} \
@@ -105,14 +106,14 @@ jobs:
                   echo "$FLAG"
                 } | sudo tee -a "$ENV_FILE" > /dev/null
               fi'
-              echo "::set-output name=new_template_name::$NEW_TEMPLATE_NAME"
 
       - name: Configure instance group to use new template
         run: |
           NEW_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates describe ${{env.NEW_TEMPLATE_NAME}} \
             --region=${{ secrets.REGION }} \
             --format="value(selfLink)")
-          echo "INSTANCE_GROUP_NAME=$(gcloud compute instance-groups managed list --region=${{ secrets.REGION }} --format="value(name)")" >> $GITHUB_ENV
+          instance_group_name=$(gcloud compute instance-groups managed list --region=${{ secrets.REGION }} --format="value(name)")
+          echo "INSTANCE_GROUP_NAME=${instance_group_name}" >> $GITHUB_ENV
           gcloud compute instance-groups managed set-instance-template ${{env.INSTANCE_GROUP_NAME}} \
             --template=${NEW_TEMPLATE_SELF_LINK} \
             --region=${{ secrets.REGION }}
