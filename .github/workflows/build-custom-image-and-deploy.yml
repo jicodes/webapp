@@ -108,21 +108,22 @@ jobs:
 
       - name: Configure instance group to use new template
         run: |
-          NEW_TEMPLATE_SELF_LINK=$(gcloud compute instance-templates describe ${NEW_TEMPLATE_NAME} \
+          new_template_self_link=$(gcloud compute instance-templates describe ${NEW_TEMPLATE_NAME} \
             --region=${{ secrets.REGION }} \
             --format="get(selfLink)")
+          echo "NEW_TEMPLATE_SELF_LINK=$new_template_self_link" >> $GITHUB_ENV
 
           instance_group_name=$(gcloud compute instance-groups managed list --regions=${{ secrets.REGION }} --format="get(name)")
           echo "INSTANCE_GROUP_NAME=$instance_group_name" >> $GITHUB_ENV
           
           gcloud compute instance-groups managed set-instance-template ${instance_group_name} \
-            --template=${NEW_TEMPLATE_SELF_LINK} \
+            --template=${new_template_self_link} \
             --region=${{ secrets.REGION }}
 
       - name: Make managed instance group to start basic rolling update
         run: |
           gcloud compute instance-groups managed rolling-action start-update ${INSTANCE_GROUP_NAME} \
-            --version=template=${NEW_TEMPLATE_NAME} \
+            --version=template=${NEW_TEMPLATE_SELF_LINK} \
             --region=${{ secrets.REGION }} \
             --max-unavailable=3
 
