@@ -112,7 +112,7 @@ jobs:
             --region=${{ secrets.REGION }} \
             --format="get(selfLink)")
 
-          instance_group_name=$(gcloud compute instance-groups managed list --region=${{ secrets.REGION }} --format="value(name)")
+          instance_group_name=$(gcloud compute instance-groups managed list --regions=${{ secrets.REGION }} --format="get(name)")
           echo "INSTANCE_GROUP_NAME=$instance_group_name" >> $GITHUB_ENV
           
           gcloud compute instance-groups managed set-instance-template ${instance_group_name} \
