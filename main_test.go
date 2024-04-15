@@ -34,7 +34,7 @@ const (
 func setupUser(router *gin.Engine, firstName, lastName, password, username string) (int, error) {
 	// Create an user 
 	createUserPayload := []byte(fmt.Sprintf(`{"first_name" : "%s", "last_name" : "%s", "password" : "%s", "username": "%s"}`, firstName, lastName, password, username))
-	createUserReq, err := http.NewRequest("POST", "/v1/user", bytes.NewBuffer(createUserPayload))
+	createUserReq, err := http.NewRequest("POST", "/v2/user", bytes.NewBuffer(createUserPayload))
 	if err != nil {
 			return 0, fmt.Errorf("Failed to create request: %v", err)
 	}
@@ -91,7 +91,7 @@ func TestCreateUser(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, resCode, "Should return a 201 status code for a successful user creation")
 	// Validate the user was created 
-	getUserReq, _ := http.NewRequest("GET", "/v1/user/self", nil)
+	getUserReq, _ := http.NewRequest("GET", "/v2/user/self", nil)
 	getUserReq.Header.Set("Content-Type", "application/json")
 
 	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(testUsername + ":" + testPassword))
@@ -129,7 +129,7 @@ func TestUpdateUser(t *testing.T) {
 
 	// Test 2 - Update the account and validate the account was updated
 	updateUserPayload := []byte(fmt.Sprintf(`{"first_name" : "%s", "last_name" : "%s", "password" : "%s"}`, updatedFirstName, updatedLastName, updatedPassword))
-	updateUserReq, _ := http.NewRequest("PUT", "/v1/user/self", bytes.NewBuffer(updateUserPayload))
+	updateUserReq, _ := http.NewRequest("PUT", "/v2/user/self", bytes.NewBuffer(updateUserPayload))
 	updateUserReq.Header.Set("Content-Type", "application/json")
 
 	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(testUsername + ":" + testPassword))
