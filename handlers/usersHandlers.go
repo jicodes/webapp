@@ -43,7 +43,7 @@ func CreateUser(c *gin.Context) {
 			"error": "Username must be a valid email",
 		})
 
-		logger.Error().Msg("Username must be a valid email")
+		logger.Warn().Msg("Username must be a valid email")
 		return
 	}
 
